@@ -107,19 +107,19 @@ if __name__ == '__main__':
     fem = Fem('disc_4_loads.npz', initial_area=1e-4, volume=1, young=1, fx=1, fy=1)
     fem.generate_mat_file()
 
-    from numpy.core.records import fromarrays
-    from scipy.io import savemat
-
-    nodes = [fromarrays([1, 2], names=['x', 'y']),
-             fromarrays([1, 2], names=['x', 'y'])]
-
-    elements = [fromarrays(nodes, names=['node1', 'node2']),
-                fromarrays(nodes, names=['node1', 'node2']),
-                fromarrays(nodes, names=['node1', 'node2'])]
-
-    structure = fromarrays(elements, names=['Element'])
-
-    test = {'Structure': structure}
-
-    a = savemat('test.mat', test)
-    b = 3
+    # from numpy.core.records import fromarrays
+    # from scipy.io import savemat
+    #
+    # nodes = [fromarrays([1, 2], names=['x', 'y']),
+    #          fromarrays([1, 2], names=['x', 'y'])]
+    #
+    # elements = [fromarrays(nodes, names=['node1', 'node2']),
+    #             fromarrays(nodes, names=['node1', 'node2']),
+    #             fromarrays(nodes, names=['node1', 'node2'])]
+    #
+    # structure = fromarrays(elements, names=['Element'])
+    #
+    # test = {'Structure': structure}
+    #
+    # a = savemat('test.mat', test)
+    # b = 3
