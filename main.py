@@ -1,4 +1,5 @@
 from scipy.spatial import KDTree
+from scipy.io import savemat
 import numpy as np
 import json
 
@@ -46,7 +47,7 @@ class Fem:
         """
         self.nodes: list[Node] = []
         self.elements: list[Element] = []
-        self.file = npz_filename
+        self.filename = npz_filename
         self.initial_area = initial_area
         self.volume = volume
         self.young = young
@@ -68,8 +69,7 @@ class Fem:
             node1, node2 = [self.nodes[j] for j in self.data.elements[i]]
             self.elements.append(Element([node1, node2], self.young, self.initial_area, node1.distance(node2)))
 
-    def generate_json_file(self):
-        print('Generating mat file...')
+    def generate_dict(self):
         mat_file = {'fem': {'NNode': len(self.nodes),
                             'NElem': len(self.elements),
                             'Vol': self.volume}}
@@ -97,12 +97,21 @@ class Fem:
                                                'E': self.elements[i].E,
                                                'A': self.elements[i].A,
                                                'L': self.elements[i].length()}]
+        return mat_file
 
-        new_file_name = (f'{self.file.replace(".npz", "")}__fx-{str(self.fx).replace(".", "_")}__fy-'
-                         f'{str(self.fy).replace(".", "_")}.json')
+    def new_file_name(self):
+        return (f'{self.filename.replace(".npz", "")}__fx-{str(self.fx).replace(".", "_")}__fy-'
+                f'{str(self.fy).replace(".", "_")}')
 
-        with open(new_file_name, 'w') as outfile:
-            json.dump(mat_file, outfile)
+    def save_json(self):
+        print('Generating .json file...')
+        with open(f'{self.new_file_name()}.json', 'w') as outfile:
+            json.dump(self.generate_dict(), outfile)
+        print('Done!')
+
+    def save_mat(self):
+        print('Generating .mat file...')
+        savemat(f'{self.new_file_name()}.mat', self.generate_dict())
 
         print('Done!')
 
@@ -113,8 +122,10 @@ if __name__ == '__main__':
 
     for file in files:
         for force in forces:
-            fem1 = Fem(file, initial_area=1e-4, volume=1, young=1, fx=force, fy=1.0)
-            fem1.generate_json_file()
+            fem1 = Fem(file, initial_area=1e-4, volume=1.0, young=1.0, fx=force, fy=1.0)
+            fem1.save_json()
+            fem1.save_mat()
 
-            fem2 = Fem(file, initial_area=1e-4, volume=1, young=1, fx=1.0, fy=force)
-            fem2.generate_json_file()
+            fem2 = Fem(file, initial_area=1e-4, volume=1.0, young=1.0, fx=1.0, fy=force)
+            fem2.save_json()
+            fem2.save_mat()
