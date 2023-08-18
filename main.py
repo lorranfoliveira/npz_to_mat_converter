@@ -1,6 +1,6 @@
-from scipy.io import savemat
 from scipy.spatial import KDTree
 import numpy as np
+import json
 
 
 class Node:
@@ -35,7 +35,7 @@ class Data:
 
 
 class Fem:
-    def __init__(self, npz_filename, initial_area=1e-4, volume=1, young=1, fx=1, fy=1):
+    def __init__(self, npz_filename, initial_area=1e-4, volume=1.0, young=1.0, fx=1.0, fy=1.0):
         """Constructor
 
         :param npz_filename: Path to npz file
@@ -68,7 +68,7 @@ class Fem:
             node1, node2 = [self.nodes[j] for j in self.data.elements[i]]
             self.elements.append(Element([node1, node2], self.young, self.initial_area, node1.distance(node2)))
 
-    def generate_mat_file(self):
+    def generate_json_file(self):
         print('Generating mat file...')
         mat_file = {'fem': {'NNode': len(self.nodes),
                             'NElem': len(self.elements),
@@ -88,38 +88,22 @@ class Fem:
 
         for i in range(len(self.elements)):
             try:
-                mat_file['fem']['Element'].append({'nodes': self.data.elements[i] + 1,
+                mat_file['fem']['Element'].append({'nodes': [int(j) for j in self.data.elements[i] + 1],
                                                    'E': self.elements[i].E,
                                                    'A': self.elements[i].A,
                                                    'L': self.elements[i].length()})
             except KeyError:
-                mat_file['fem']['Element'] = [{'nodes': self.data.elements[i] + 1,
+                mat_file['fem']['Element'] = [{'nodes': [int(j) for j in self.data.elements[i] + 1],
                                                'E': self.elements[i].E,
                                                'A': self.elements[i].A,
                                                'L': self.elements[i].length()}]
 
-        savemat(self.file.replace('.npz', '.mat'), mat_file)
+        with open(self.file.replace('.npz', '.json'), 'w') as outfile:
+            json.dump(mat_file, outfile)
 
         print('Done!')
 
 
 if __name__ == '__main__':
-    fem = Fem('disc_4_loads.npz', initial_area=1e-4, volume=1, young=1, fx=1, fy=1)
-    fem.generate_mat_file()
-
-    # from numpy.core.records import fromarrays
-    # from scipy.io import savemat
-    #
-    # nodes = [fromarrays([1, 2], names=['x', 'y']),
-    #          fromarrays([1, 2], names=['x', 'y'])]
-    #
-    # elements = [fromarrays(nodes, names=['node1', 'node2']),
-    #             fromarrays(nodes, names=['node1', 'node2']),
-    #             fromarrays(nodes, names=['node1', 'node2'])]
-    #
-    # structure = fromarrays(elements, names=['Element'])
-    #
-    # test = {'Structure': structure}
-    #
-    # a = savemat('test.mat', test)
-    # b = 3
+    fem = Fem('disc_2_loads.npz', initial_area=1e-4, volume=1, young=1, fx=1.0, fy=1.0)
+    fem.generate_json_file()
