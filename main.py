@@ -98,12 +98,15 @@ class Fem:
                                                'A': self.elements[i].A,
                                                'L': self.elements[i].length()}]
 
-        with open(self.file.replace('.npz', '.json'), 'w') as outfile:
+        new_file_name = (f'{self.file.replace(".npz", "")}__fx-{str(self.fx).replace(".", "_")}__fy-'
+                         f'{str(self.fy).replace(".", "_")}.json')
+
+        with open(new_file_name, 'w') as outfile:
             json.dump(mat_file, outfile)
 
         print('Done!')
 
 
 if __name__ == '__main__':
-    fem = Fem('disc_2_loads.npz', initial_area=1e-4, volume=1, young=1, fx=1.0, fy=1.0)
+    fem = Fem('disc_2_loads.npz', initial_area=1e-4, volume=1, young=1, fx=1.0, fy=0.75)
     fem.generate_json_file()
